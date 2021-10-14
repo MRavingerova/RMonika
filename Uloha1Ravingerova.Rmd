@@ -1,0 +1,86 @@
+---
+title: "Uloha 1 R Notebook"
+output: html_notebook
+---
+Napíšte funkciu s nasledujúcou signatúrou
+
+combin <- function(n,k)
+{
+	...
+}
+ktorá vracia kombinačné číslo $$ n \choose k $$ Návod: Skúste implementáciu urobiť tak, aby ste nemuseli počítať faktoriály - to je veľmi neefektívne.
+
+```{r}
+combin <- function(n,k)
+{
+ if (n<k)
+   return("Error, n je menšie ako k")
+ else
+    return(factorial(n)/(factorial(n-k)*factorial(k)))
+}
+
+combin(7,2)
+combin(9,5)
+```
+
+Predstavte si, že v R nemáme funkciu sqrt a napíšte funkciu, ktorá vráti odhad odmocniny x. Môžete využiť napríklad iteratívny vzťah $$ a_{n+1} = \frac{1}{2}\left(a_n + \frac{x}{a_n}\right) $$​ Tento vzťah pochádza z riešenia rovnice $x-a^2=0$ Newtonovou metódou a iterácie dobre konvergujú. Odhadnite presnosť výsledku.
+
+```{r}
+odmocnina <- function(n)
+{
+a <- 2
+min <- 1e-10
+repeat
+  {
+  if (abs((a^2)-n) < min)
+     break
+  else a <- 0.5*((n/a)+a)
+  }
+return(a)
+}
+
+odmocnina(4)
+odmocnina(16)
+odmocnina(144)
+```
+
+Napíšte funkciu s nasledujúcou signatúrou
+
+integ <- function(f, a, b)
+{
+	...    
+}
+ktorá vypočíta odhad určitého integrálu $$ \int_a^b f(x)dx $$ a jeho chybu - teda vracia dve hodnoty. Toto sa v R robí tak, že vrátite zoznam r, pričom r$integral bude hodnota a r$error jej chyba.
+
+```{r}
+integ <- function(f, a, b)
+{
+  f <- function(x) {sin(x)*x^2}   #{x^3} 
+  return(integrate(f, a, b)) 
+}
+
+integ(sin(x)*x^2,5,7)
+integ(sin(x)*x^2,5,8)
+```
+
+Napíšte funkciu so signatúrou
+
+clear.dia <- function(s)
+{
+  ...
+}
+ktorá nahradí znaky s diakritikou v textovom reťazci príslušnými znakmi bez diakritiky, teda napríklad Čučoriedka -> Cucoriedka
+
+```{r}
+library(stringi)
+clear.dia <- function(s)
+{
+  return(stri_trans_general(s, "Latin-ASCII"))
+}
+
+clear.dia("čučoriedka")
+clear.dia("kávička")
+```
+
+
+Návod: Najjednoduchšie je použiť prekladový "slovník" pre náhradu znakov.
