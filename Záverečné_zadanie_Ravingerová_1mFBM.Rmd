@@ -1,0 +1,109 @@
+---
+title: "Obvod, výška a objem čiernych čerešní"
+author: "Monika Ravingerová"
+subtitle: Záverečné zadanie 2021/2022
+output:
+  html_document:
+    df_print: paged
+---
+
+<br>
+
+__V tejto úlohe sme sa rozhodli pozrieť na dáta, ktoré obsahujú informácie o obvode, objeme a výške stromov. Chceme sa pozrieť, ako sa tieto veličiny navzájom ovplyvňujú.__
+
+
+Najprv si načítame potrebné knižnice.
+```{r}
+library(ggplot2)
+library(GGally)
+library(tidyverse)
+library(lattice)
+library(e1071)
+```
+
+<br>
+
+__Ako prvé si pozrieme naše dáta. Použili sme zabudovaný dataset Rstudia nazvaný trees.__
+```{r}
+datasets::trees
+```
+<br>
+
+__Pre lepší prehľad si zobrazíme štruktúru dát.__
+```{r}
+data(trees)
+dataset <- trees   #keď budem miesto názvu trees používať názov dataset, bude tento kód jednoduchšie použiteľný aj pre iný dataset
+str(dataset)
+```
+
+
+__Vidíme, že naše dáta obsahujú 31 pozorovaní, pri ktorých sa zaznamenali tri rôzne veličiny - objem, obvod a výška stromu. Všetky dáta sú numerické. Môžeme si tiež zobraziť prehľadnú sumarizáciu týchto dát.__
+```{r}
+summary(dataset)
+```
+<br>
+
+__Pozrieme sa teraz, ako vyzerajú histogramy pre jednotlivé veličiny.__
+```{r}
+ggplot(dataset, aes(x = Girth)) +
+  geom_histogram(binwidth = 1.5, colour="darkblue", fill="bisque") +
+  labs(title = "Histogram obvodu stromov") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab("Obvod stromov [inch]") + ylab("Pocet")
+
+ggplot(dataset, aes(x=Height)) +
+  geom_histogram(binwidth = 1.5, colour="darkblue", fill="bisque") +
+  labs(title = "Histogram výšky stromov") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab("Výška stromov [ft]") + ylab("Počet")
+
+ggplot(dataset, aes(x=Girth)) +
+  geom_histogram(binwidth = 1.5, colour="darkblue", fill="bisque") +
+  labs(title = "Histogram objemu stromov") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab("Objem stromov [ft]") + ylab("Pocet")
+```
+<br>
+
+__Po zobrazení histogramov nevieme moc povedať, ako sa naše dáta ovplyvňujú. Preto sa pozrieme na to, či medzi je nejaká závislosť alebo korelácia. Znázorníme si všetky kombinácie našich dát.  __
+```{r}
+ggpairs(dataset, columns = 1:3, title="Stromy")
+```
+<br>
+
+__Vidíme, že je tu prítomná korelácia medzi obvodom (Girth) a objemom (Volume) stromov. Ukazuje nám to korelačný koeficient, ktorého hodnota je 0,967, čiže takmer rovná 1. Tiež to môžeme pozorovať na scatter plote vľavom dolnom rohu, kde pozorujeme istú závislosť medzi Girth a Volume. Pri ostatných veličinách výraznú koreláciu nepozorujeme. __
+
+__Teraz potrebujeme zistiť, či je tento jav (vzťah medzi objemom a obvodom stromov) náhodný, alebo platí aj všeobecne. Pozrieme sa teda, či závislosť medzi Girth a Volume je lineárna.__
+```{r}
+ggplot(dataset, aes(Girth, Volume)) + geom_point()+geom_smooth()
+```
+<br>
+
+__Vidíme, že závislosť nie je dokonale rovná a hladká, ale môžeme predpokladať, že je lineárna. Možno dôvodom je nelinárnosť jednej z veličín. Pozrieme sa, či sú dáta normálne rozložené.__
+```{r}
+bwplot(dataset$Girth, main="Boxplot obvodu stromov")
+shapiro.test(dataset$Girth)
+```
+<br>
+
+__Môžeme povedať, že dáta obvodu stromov sú normálne rozdelené. Vidíme to na boxplote, stredná hodnota sa nachádza v strede a nie sú tu ani žiadne odľahlé hodnoty. Zo Shapiro-Wilk testu nám vyšla p-hodnota rovná p > 0,05, preto aj na jeho základe môžeme vidieť normálne rozdelenie dát.__
+
+```{r}
+bwplot(dataset$Volume, main="Boxplot objemu stromov")
+shapiro.test(dataset$Volume)
+```
+<br>
+
+__Dáta obvodu stromov nie sú normálne rozdelené. Vidíme to na boxplote, stredná hodnota sa nenachádza v strede, je tu prítomná odľahlá hodnota. Zo Shapiro-Wilk testu nám vyšla p-hodnota p < 0,05, preto aj na jeho základe tohto testu vidíme, že dáta nie su normálne rozdelené.__
+
+__Keďže časť našich dát je nenomrálne rozdelená, budeme na zisťovanie koreláacie medzi obvodom a objemom stromu používať neparametrické testy.__
+```{r}
+cor.test(dataset$Girth, dataset$Volume,method="pearson")
+```
+<br>
+
+__P-hodnota nám vyšla 2,2e-16, čo je oveľa menej ako naša hranica signifikatnosti p < 0,05. Preto môžeme usúdiť, že medzi objemom a obvodom stromov je veľmi silná korelácia. Výška objem ani obvod tak silno neovplyvňuje.__
+
+<br>
+
+<br>
